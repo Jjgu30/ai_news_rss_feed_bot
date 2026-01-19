@@ -1,51 +1,52 @@
-AI News Summarizer & Telegram Bot 🤖 
+# 🤖 AI News Summarizer & Telegram Bot
 
-🔴 Live Demo: Experience the bot in action by messaging @ai_news_jg_bot on Telegram! 
+**A high-signal, automated news pipeline that filters AI noise using n8n, DeepSeek V3, and Supadata.**
 
-This project is an automated AI news pipeline built with n8n. It autonomously monitors high-signal YouTube channels, extracts technical specifications from video transcripts, and broadcasts concise, emoji-coded summaries to subscribers. 
+![n8n](https://img.shields.io/badge/Orchestration-n8n-FF655A) ![DeepSeek](https://img.shields.io/badge/Intelligence-DeepSeek%20V3-blue) ![Supadata](https://img.shields.io/badge/Ingestion-Supadata-green) ![Telegram](https://img.shields.io/badge/Interface-Telegram-2CA5E0)
 
-💡 What It Does 
+## 🔴 Live Demo
+Experience the bot in action. Message **[@ai_news_jg_bot](https://t.me/ai_news_jg_bot)** on Telegram to subscribe!
 
-Automated Intelligence 
+## 📋 Project Overview
+This repository contains the orchestration logic for a **"Zero-Fluff" AI News Aggregator**. It solves the problem of information overload by autonomously monitoring video feeds, extracting hard technical specs (parameters, benchmarks, repo links), and stripping out ads/filler.
 
-The system monitors an RSS feed for new AI tech videos every hour, ensuring no major release is missed. 
+**The Goal:** Deliver 2-sentence, emoji-coded technical summaries to mobile devices instantly, eliminating the need to watch 20-minute videos.
 
-Signal Extraction 
+## 🏗️ Architecture & Logic
 
-It uses DeepSeek V3 via OpenRouter to parse unstructured transcripts. The pipeline identifies open-source tools, technical parameters, and benchmarks while stripping out sponsors and fluff using Supadata for transcript ingestion. 
+The system is split into two distinct **n8n workflows** to decouple content processing from user management.
 
-Community Management 
+### 1. The Content Engine (Intelligence)
+* **File:** `AI-RSS-Feed-bot.json`
+* **Function:** The core processing brain.
+    * **Trigger:** Monitors YouTube RSS feeds for new uploads every hour.
+    * **Ingestion:** Uses **Supadata** to fetch raw transcripts via API (bypassing video downloads).
+    * **Analysis:** Sends transcripts to **DeepSeek V3** (via OpenRouter) with a strict system prompt to:
+        * Extract tool names & parameters (e.g., "100M params", "Runs on CPU").
+        * Identify Open Source projects.
+        * **Aggressively filter** sponsors, intros, and conversational filler.
+    * **Broadcast:** Pushes the cleaned summary to all active subscribers via Telegram.
 
-The bot handles user subscriptions automatically and broadcasts formatted updates directly via a custom Telegram bot, storing subscriber data in Google Sheets. 
+### 2. The Subscriber Manager (User Ops)
+* **File:** `AI-RSS-Feed-bot-subscribers.json`
+* **Function:** Handles user interactions and database management.
+    * **Trigger:** Listens for webhooks from the Telegram Bot API.
+    * **Logic:**
+        * `/start`: Onboards new users by logging their `Chat ID`, `Username`, and `First Name` into **Google Sheets**.
+        * `/stop`: Removes users from the broadcast list.
+        * **Fallback:** Handles unknown commands with a help menu.
 
- 
+## 🛠️ Tech Stack
 
-🛠️ System Architecture 
+* **Orchestrator:** n8n (Self-Hosted/Cloud)
+* **LLM:** DeepSeek V3 (Chosen for high accuracy in technical extraction)
+* **Ingestion:** Supadata API
+* **Database:** Google Sheets (Subscriber directory)
+* **Frontend:** Telegram Bot API
 
-The system runs on two distinct n8n workflows that handle content processing and user management separately. 
+## 📂 Repository File Manifest
 
-1. The Content Engine (AI-RSS-Feed-bot.json) 
-
-This workflow is the "brain" of the operation. It turns raw video into structured data. 
-
-Trigger Detects new items via a YouTube-to-RSS feed. 
-
-Ingestion (Supadata) Hits the Supadata API to instantly fetch the video transcript without downloading the media file. 
-
-Analysis (DeepSeek V3) Passes the transcript through an LLM Chain with a strict prompt to extract tools (e.g., 🎵 Audio, 🖼️ Image) and filter out ads. 
-
-Broadcast Retrieves the active subscriber list from Google Sheets and pushes the summary to all Chat IDs. 
-
-2. The Subscriber Manager (AI-RSS-Feed-bot-subscribers.json) 
-
-This workflow handles the user interaction logic. 
-
-Trigger Listens for direct messages to @ai_news_jg_bot. 
-
-Logic Routing The system captures the user's /start command, extracts their Chat ID, First Name, and Username, and saves them to a Google Sheet database. It also handles unsubscribe requests (/stop) and provides a fallback menu for unknown commands. 
-
- 
-
-🧩 Tech Stack 
-
-Orchestration: n8n LLM / Intelligence: DeepSeek V3 (via OpenRouter) Data Ingestion: Supadata (YouTube Transcripts) Database: Google Sheets Interface: Telegram Bot API 
+```text
+├── AI-RSS-Feed-bot.json              # MAIN: Content Engine & LLM Logic
+├── AI-RSS-Feed-bot-subscribers.json  # OPS: User Management & Database Logic
+├── README.md                         # Documentation
