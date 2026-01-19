@@ -1,10 +1,10 @@
 AI News Summarizer & Telegram Bot 🤖
-
-🔴 Live Demo: Experience the bot in action by messaging @ai_news_jg_bot on Telegram!
+**
+🔴 Live Demo: Experience the bot in action by messaging @ai_news_jg_bot on Telegram!**
   
   This project is an automated AI news pipeline built with n8n. It autonomously monitors high-signal YouTube channels, extracts technical specifications from video transcripts, and broadcasts concise, emoji-coded summaries to subscribers.
 
-💡 What It Does
+**💡 What It Does**
   
   Automated Intelligence The system monitors an RSS feed for new AI tech videos every hour, ensuring no major release is missed.
   
@@ -12,7 +12,7 @@ AI News Summarizer & Telegram Bot 🤖
   
   Community Management The bot handles user subscriptions automatically and broadcasts formatted updates directly via a custom Telegram bot.
 
-🛠️ System Architecture
+**🛠️ System Architecture**
 
   The system runs on two distinct n8n workflows that handle content processing and user management separately.
   
@@ -35,7 +35,7 @@ AI News Summarizer & Telegram Bot 🤖
   Trigger Listens for direct messages to @ai_news_jg_bot.
   
   Logic Routing The system captures the user's /start command, extracts their Chat ID, First Name, and Username, and saves them to a Google Sheet database. It also handles unsubscribe requests (/stop) and provides a fallback menu for unknown commands.
-
-🧩 Tech Stack
+**
+🧩 Tech Stack**
 
 Orchestration: n8n LLM / Intelligence: DeepSeek V3 (via OpenRouter) Data Ingestion: Supadata (YouTube Transcripts) Database: Google Sheets Interface: Telegram Bot API
