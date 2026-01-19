@@ -1,4 +1,3 @@
-Here is the revised Showcase Style README. I have removed all bullet points to prevent the grey text formatting issue.
 AI News Summarizer & Telegram Bot 🤖
 
 🔴 Live Demo: Experience the bot in action by messaging @ai_news_jg_bot on Telegram!
