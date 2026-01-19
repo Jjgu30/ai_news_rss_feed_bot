@@ -1,0 +1,242 @@
+{
+  "name": "AI-RSS-Feed-bot-subscribers",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        0
+      ],
+      "id": "f47cd1e1-a90a-4032-aa31-9854f28c8353",
+      "name": "Telegram Trigger",
+      "webhookId": "5ffe3e11-94df-49b0-967f-978062ba5b91",
+      "credentials": {
+        "telegramApi": {
+          "id": "yaY6tJvtGmbNrDvk",
+          "name": "ai_news_jg_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4a7a0690-71c5-4901-be58-d802ee824a52",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "a09fefc5-b43e-4cc6-bdb3-7903fc91c0ed",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "=👋 Hi {{ $json.message.from.first_name }}!\n\nI am the AI News Bot. 🤖 I didn't recognize that command.\n\nTo subscribe to the daily updates, please tap or type: 👉 /start",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        208
+      ],
+      "id": "d53a1bcd-8f22-405b-bcc9-a6f6429882ae",
+      "name": "Send a text message1",
+      "webhookId": "9733c811-9a14-4253-82ec-ac88c66a3d9f",
+      "credentials": {
+        "telegramApi": {
+          "id": "yaY6tJvtGmbNrDvk",
+          "name": "ai_news_jg_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json['Chat ID'] }}",
+        "text": "✅ Success! You are subscribed.\n\nYou have been added to the broadcast list. You'll receive the next AI News summary as soon as it drops!\n\nType /stop to unsubscribe at any time.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        -16
+      ],
+      "id": "471e9d87-bc08-4906-b04f-c4940e8469d3",
+      "name": "Send a text message",
+      "webhookId": "301b5097-a0a6-4484-ae1d-c8c01be7a3b6",
+      "credentials": {
+        "telegramApi": {
+          "id": "yaY6tJvtGmbNrDvk",
+          "name": "ai_news_jg_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1gt2samVfQnvP7dVVdjteMD26-9LaHZsAuf0q1pGMl64",
+          "mode": "list",
+          "cachedResultName": "n8n-ai-bot-subscribers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gt2samVfQnvP7dVVdjteMD26-9LaHZsAuf0q1pGMl64/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gt2samVfQnvP7dVVdjteMD26-9LaHZsAuf0q1pGMl64/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.message.from.first_name }}",
+            "Chat ID": "={{ $json.message.from.id }}",
+            "Username": "={{ $json.message.from.username }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Chat ID",
+              "displayName": "Chat ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "e775771b-6020-4c2c-8a06-69c230f552c7",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "Xtt65abWhlYGqezW",
+          "name": "n8n-ai-bot-feed"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "86f49485-90e8-4161-86a4-a5163e488b19",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ace71d1371e371321adb7311a59fcab45f3b491e8e383c2cc34c7bfc7f1ac8e"
+  },
+  "id": "0S74M5Ge1Uc8BM-woj3wJ",
+  "tags": []
+}

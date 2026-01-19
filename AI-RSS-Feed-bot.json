@@ -1,0 +1,231 @@
+{
+  "name": "AI-RSS-Feed-bot",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "feedUrl": "https://rss.app/feeds/n6l3dUlQNfS0So4V.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "dc4794d6-38b1-4e44-a2c5-5b1184eedac5",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the transcript to summarize:\n\n{{ $json.content }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "### Role\nYou are an expert AI Tech Analyst. Your goal is to extract a high-value, signal-only summary of AI tools and news from a raw YouTube transcript.\n\n### 1. Extraction Protocol (Read First)\nBefore summarizing, scan the text and identify every distinct tool mentioned.\n* **Split on Transitions:** Pay close attention to phrases like \"Next up,\" \"Also this week,\" \"But did you know,\" or \"In addition.\" These signal a new tool. Do not merge adjacent tools.\n* **Nameless Tools:** If the transcript describes a tool but does not name it (e.g., \"we have a new tiny model\"), label it as \"**Unnamed [Function] Tool**\". **DO NOT** use external knowledge to hallucinate a name that is not in the text.\n\n### 2. Filtering Rules (CRITICAL)\n* **NO SPONSORS:** Aggressively detect and remove paid integrations. Keywords: \"sponsor of this video,\" \"brought to you by,\" \"Loveart.\" If the speaker pivots to a \"platform for content creation\" with a specific discount or link call-to-action, it is an ad.\n* **NO FLUFF:** Remove intros, outros, and meta-talk (\"Link in description\").\n* **NO DUPLICATES:** If a tool is mentioned multiple times, summarize it once.\n\n### 3. Formatting Rules\n* **Structure:** Provide a flat bulleted list.\n* **Emoji & Header:** Start each bullet with a relevant emoji.\n    * 🎵 = Music, Audio, TTS, Voice\n    * 🖼️ = Image, Video generation, Graphics editors\n    * 🤖 = Agents, Desktop automation, Mouse control\n    * 🧊 = 3D models, Rigging, Depth estimation, Point clouds\n    * 🧠 = LLMs, Text models, Code generation\n* **Open Source Tag:** If the transcript explicitly says \"Open Source\" or \"GitHub repo,\" add `[Open Source]` next to the name.\n* **Content:** Exactly 2-3 sentences per item. Focus on **technical specs** (parameters, latency, hardware requirements) and **unique capabilities**."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        640,
+        0
+      ],
+      "id": "4d8fce7b-cc13-4482-84b5-b684a828ed3e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-v3.2",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        640,
+        192
+      ],
+      "id": "0f0cfafe-0e9b-41e3-8fe9-0728d8f4f165",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "cirkm4eb2yEh5hNv",
+          "name": "n8n-rss-ai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json['Chat ID'] }}",
+        "text": "=🚨 *AI News Update* 🚨\n\n{{ $('Basic LLM Chain').item.json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1232,
+        0
+      ],
+      "id": "5fbf6e25-5b47-4cbd-bf5c-45b7c963a35c",
+      "name": "Send a text message",
+      "webhookId": "a827a6da-50fc-4b23-9b6f-9d0ed13f0e69",
+      "credentials": {
+        "telegramApi": {
+          "id": "yaY6tJvtGmbNrDvk",
+          "name": "ai_news_jg_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1gt2samVfQnvP7dVVdjteMD26-9LaHZsAuf0q1pGMl64",
+          "mode": "list",
+          "cachedResultName": "n8n-ai-bot-subscribers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gt2samVfQnvP7dVVdjteMD26-9LaHZsAuf0q1pGMl64/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gt2samVfQnvP7dVVdjteMD26-9LaHZsAuf0q1pGMl64/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        992,
+        0
+      ],
+      "id": "92483095-a5f9-490e-b269-76eb3f43a798",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "Xtt65abWhlYGqezW",
+          "name": "n8n-ai-bot-feed"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.supadata.ai/v1/youtube/transcript",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.link }}"
+            },
+            {
+              "name": "text",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        432,
+        0
+      ],
+      "id": "ec50023b-544e-46b1-81d1-e6c9733634f1",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YLneFA8xwq97E6En",
+          "name": "n8n-rss-ai"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timeSavedPerExecution": 15
+  },
+  "versionId": "dcbb3f69-017a-4078-8901-96613add483b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ace71d1371e371321adb7311a59fcab45f3b491e8e383c2cc34c7bfc7f1ac8e"
+  },
+  "id": "yNaLaYf0Q1OBDAawQyziU",
+  "tags": []
+}
